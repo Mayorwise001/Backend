@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= title %></title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/styles/products.css"/>
+  </head>
+
+  <body>
+    <h1>🛍️ All Uploaded Products</h1>
+    <h2>Upload new product <a href="/" class="here">Click here</a></h2>
+
+    <% if (products.length > 0) { %>
+    <div class="grid">
+      <% products.forEach(product => { %>
+      <div class="card">
+        <img src="<%= product.image %>" alt="<%= product.title %>" />
+        <div class="card-content">
+          <h3><%= product.title %></h3>
+          <p><%= product.details %></p>
+          <p class="price">₦<%= product.price.toLocaleString() %></p>
+          <p class="rating">⭐ <%= product.rating.rate %>/5</p>
+
+            <!-- ✅ View Details Button -->
+      <a href="/products/<%= product._id %>" class="btn">View Details</a>
+        </div>
+      </div>
+      <% }) %>
+    </div>
+    <% } else { %>
+    <p class="empty">No products uploaded yet.</p>
+    <% } %>
+  </body>
+</html>

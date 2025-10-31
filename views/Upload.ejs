@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Upload Product</title>
+  <link rel="stylesheet" href="/styles/uploads2.css">
+</head>
+<body>
+  <div class="container">
+    <h2>Upload Product</h2>
+
+    <form id="imageForm" enctype="multipart/form-data">
+      <!-- Product Title -->
+      <label for="title">Product Title</label>
+      <input type="text" name="title" id="title" placeholder="Enter product title" required />
+
+      <!-- Product Details -->
+      <label for="details">Product Details</label>
+      <textarea name="details" id="details" placeholder="Enter product details" required></textarea>
+
+      <!-- Product Rating -->
+      <label for="rating">Rating</label>
+      <input type="number" name="rating" id="rating" step="0.1" min="0" max="5" placeholder="Enter product rating" required />
+
+      <!-- Product Price -->
+      <label for="price">Price (₦)</label>
+      <input type="number" name="price" id="price" step="0.01" placeholder="Enter price" required />
+
+      <!-- Product Image -->
+      <label for="image">Product Image</label>
+      <input type="file" name="image" id="image" accept="image/*" required />
+
+      <button type="submit">Upload</button>
+      <button type="submit"><a href="/products">View all Products</a></button>
+      <p id="message"></p>
+    </form>
+
+    <div id="gallery"></div>
+  </div>
+
+  <script>
+    const form = document.getElementById("imageForm");
+    const message = document.getElementById("message");
+    const gallery = document.getElementById("gallery");
+
+    // ✅ Upload Product with Image
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const formData = new FormData(form);
+
+      try {
+        const res = await fetch("/upload", { method: "POST", body: formData });
+        const data = await res.json();
+
+        if (res.ok) {
+          message.textContent = "✅ Product uploaded successfully!";
+          message.style.color = "green";
+          form.reset();
+          loadImages();
+        } else {
+          message.textContent = data.message || "❌ Upload failed";
+          message.style.color = "red";
+        }
+      } catch (err) {
+        message.textContent = "❌ Error uploading product";
+        message.style.color = "red";
+      }
+    });
+
+    // ✅ Fetch and Display All Uploaded Images
+    async function loadImages() {
+      const res = await fetch("/images/all");
+      const images = await res.json();
+
+      gallery.innerHTML = images
+        .map((img) => `<img src="${img}" alt="Uploaded Image">`)
+        .join("");
+    }
+
+    loadImages();
+  </script>
+</body>
+</html>

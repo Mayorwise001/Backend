@@ -1,0 +1,179 @@
+/* Product Details — styled consistently with edit.css */
+
+:root {
+  --bg: #f6f8fb;
+  --card: #ffffff;
+  --muted: #607089;
+  --accent: #0066ff;
+  --accent-2: #0050d4;
+  --success: #17b26b;
+  --warning: #e9b611;
+  --shadow: 0 10px 30px rgba(19, 32, 56, 0.06);
+  --radius: 12px;
+  font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+}
+
+/* ---------- BASE ---------- */
+body {
+  font-family: "Inter", sans-serif;
+  background: linear-gradient(180deg, var(--bg) 0%, #eef4ff 100%);
+  margin: 0;
+  padding: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  color: #0f1724;
+}
+
+/* ---------- CONTAINER ---------- */
+.product-container {
+  background: var(--card);
+  padding: 28px;
+  border-radius: var(--radius);
+  max-width: 900px;
+  width: 100%;
+  box-shadow: var(--shadow);
+  display: flex;
+  gap: 32px;
+  animation: fadeIn 0.4s ease-in-out;
+}
+
+/* Stack layout on small screens */
+@media (max-width: 780px) {
+  .product-container {
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+  }
+}
+
+/* ---------- IMAGE ---------- */
+.product-container img {
+  width: 320px;
+  height: 320px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid #eef5ff;
+  box-shadow: 0 6px 18px rgba(8, 20, 40, 0.04);
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+
+.product-container img:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 16px 30px rgba(8,20,40,0.08);
+}
+
+/* ---------- DETAILS SECTION ---------- */
+.details {
+  flex: 1;
+}
+
+.details h2 {
+  margin-top: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #071029;
+}
+
+.details p {
+  margin: 10px 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+/* ---------- PRICE & RATING ---------- */
+.price {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--success);
+  margin-top: 10px;
+}
+
+.rating {
+  color: #f4b400;
+  font-weight: 600;
+}
+
+/* ---------- BUTTONS ---------- */
+.back,
+.btn-edit,
+.btn-delete {
+  display: inline-block;
+  margin-top: 20px;
+  padding: 10px 16px;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 10px;
+  font-weight: 600;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, opacity 0.12s ease;
+}
+
+/* Back button — blue gradient */
+.back {
+  background: linear-gradient(180deg, var(--accent) 0%, var(--accent-2) 100%);
+  box-shadow: 0 8px 20px rgba(3,102,255,0.12);
+}
+
+.back:hover {
+  transform: translateY(-2px);
+  opacity: 0.96;
+}
+
+/* Edit button — warm gold gradient */
+.btn-edit {
+  background: linear-gradient(180deg, #d4a403 0%, var(--warning) 100%);
+  box-shadow: 0 8px 20px rgba(233,182,17,0.2);
+}
+
+.btn-edit:hover {
+  transform: translateY(-2px);
+  opacity: 0.96;
+}
+
+/* ---------- ANIMATION ---------- */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------- DARK MODE ---------- */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #071022;
+    --card: #0b1220;
+    --muted: #9fb0c8;
+    --accent: #2f80ff;
+    --accent-2: #1f63d1;
+    --shadow: 0 10px 30px rgba(0,0,0,0.6);
+  }
+  body {
+    background: linear-gradient(180deg,#041026,#071022);
+    color: #e6f0ff;
+  }
+  .product-container img {
+    border: 1px solid rgba(255,255,255,0.03);
+  }
+  .details p { color: #9fb0c8; }
+}
+
+
+.btn-delete {
+  background-color: #d9534f;
+  display: inline-block;
+   color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.3s ease;
+   margin-top: 20px;
+  padding: 10px 16px;
+  font-size: 1rem;
+}
+
+.btn-delete:hover {
+  background-color: #c9302c;
+}
+
+
