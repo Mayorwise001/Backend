@@ -47,14 +47,89 @@ router.get("/products", async (req, res) => {
 });
 
 
+// ✅ Get All Products (API Endpoint for React Frontend)
+router.get("/api/products", async (req, res) => {
+  try {
+    const products = await Product.find();
+
+    // ✅ Convert relative image paths into full URLs
+    const updatedProducts = products.map((p) => ({
+      ...p._doc,
+      image: p.image
+        ? `${req.protocol}://${req.get("host")}${p.image}` // e.g. http://localhost:5000/uploads/images/abc.png
+        : null,
+    }));
+
+    res.status(200).json({
+      message: "🛒 All uploaded products",
+      count: products.length,
+      products: updatedProducts,
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+
+
 // ✅ Upload Product and Save to Database
+// router.post("/upload", upload.single("image"), async (req, res) => {
+//   try {
+//     // Check if image exists
+//     if (!req.file) return res.status(400).json({ message: "No image uploaded" });
+
+//     // Extract fields from form
+//     const { title, details, rating, price, categories } = req.body;
+
+//     // Validate required fields
+//     if (!title || !details || !rating || !price ) {
+//       return res
+//         .status(400)
+//         .json({ message: "All fields are required (title, details, rating, price, image)" });
+//     }
+
+//     // ✅ Create new product instance
+//     const newProduct = new Product({
+//       title,
+//       details,
+//       image: `/uploads/images/${req.file.filename}`,
+//       price: parseFloat(price),
+//       categories: categories
+//         ? categories.split(",").map((cat) => cat.trim()) // handle comma-separated list
+//         : [], // default empty array
+//       rating: {
+//         rate: parseFloat(rating),
+//         count: 1, // default to 1 for first rating input
+//       },
+//     });
+
+//     // ✅ Save product to MongoDB
+//     await newProduct.save();
+
+//     // Send response with all data
+//     res.status(200).json({
+//       message: "✅ Product uploaded and saved successfully!",
+//       product: newProduct,
+//     });
+//   } catch (err) {
+//     res.status(500).json({ message: err.message });
+//   }
+// });
+
+
 router.post("/upload", upload.single("image"), async (req, res) => {
   try {
     // Check if image exists
     if (!req.file) return res.status(400).json({ message: "No image uploaded" });
 
     // Extract fields from form
-    const { title, details, rating, price } = req.body;
+    const { title, details, rating, price, categories } = req.body;
+const categoryArray = Array.isArray(categories)
+  ? categories
+  : categories.split(",").map((cat) => cat.trim());
+
+
+
 
     // Validate required fields
     if (!title || !details || !rating || !price) {
@@ -73,6 +148,8 @@ router.post("/upload", upload.single("image"), async (req, res) => {
         rate: parseFloat(rating),
         count: 1, // default to 1 for first rating input
       },
+categories: categoryArray, // ✅ not category
+
     });
 
     // ✅ Save product to MongoDB
@@ -88,20 +165,30 @@ router.post("/upload", upload.single("image"), async (req, res) => {
   }
 });
 
-// ✅ View Single Product Details
-router.get("/products/:id", async (req, res) => {
+// ✅ Get Single Product Details (for React frontend)
+router.get("/api/products/:id", async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
 
     if (!product) {
-      return res.status(404).render("notFound", { message: "Product not found" });
+      return res.status(404).json({ message: "Product not found" });
     }
 
-    res.render("productDetails", { product });
+    // ✅ Convert relative image path into full URL
+    const updatedProduct = {
+      ...product._doc,
+      image: product.image
+        ? `${req.protocol}://${req.get("host")}${product.image}` // ✅ Add slash
+        : null,
+    };
+
+    res.status(200).json(updatedProduct);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
+
+
 
 // GET Edit Product Page
 router.get("/edit/:id", async (req, res) => {

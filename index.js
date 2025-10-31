@@ -30,7 +30,7 @@ app.set("views", path.join(__dirname, "views"));
 app.use(express.static(path.join(__dirname, "public")));
 app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 app.use("/uploads/images", express.static(path.join(__dirname, "uploads/images")));
-
+app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
   
   // Product routes

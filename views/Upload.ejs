@@ -19,6 +19,16 @@
       <label for="details">Product Details</label>
       <textarea name="details" id="details" placeholder="Enter product details" required></textarea>
 
+      <!-- ✅ Product Category -->
+      <label for="categories">Category</label>
+      <select name="categories" id="categories" required>
+        <option value="">-- Select Category --</option>
+        <option value="Laptops">Laptops</option>
+        <option value="Accessories">Accessories</option>
+        <option value="Gaming">Gaming</option>
+        <option value="Electronics">Electronics</option>
+      </select>
+
       <!-- Product Rating -->
       <label for="rating">Rating</label>
       <input type="number" name="rating" id="rating" step="0.1" min="0" max="5" placeholder="Enter product rating" required />

@@ -1,4 +1,3 @@
-// models/productModel.js
 import mongoose from "mongoose";
 
 const productSchema = new mongoose.Schema(
@@ -21,6 +20,11 @@ const productSchema = new mongoose.Schema(
       required: [true, "Please provide a product price"],
       min: [0, "Price cannot be negative"],
     },
+    categories: {
+      type: [String],
+      required: [true, "Please select at least one product category"],
+      enum: ["Laptops", "Accessories", "Gaming", "Electronics"],
+    },
     rating: {
       rate: {
         type: Number,
@@ -35,11 +39,8 @@ const productSchema = new mongoose.Schema(
       },
     },
   },
-  {
-    timestamps: true, // adds createdAt & updatedAt fields
-  }
+  { timestamps: true }
 );
 
 const Product = mongoose.model("Product", productSchema);
-
 export default Product;
