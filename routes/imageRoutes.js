@@ -57,29 +57,6 @@ router.get("/products", async (req, res) => {
 
 
 
-// ✅ Get All Products (API Endpoint for React Frontend)
-// router.get("/api/products", async (req, res) => {
-//   try {
-//     const products = await Product.find();
-
-//     // ✅ Convert relative image paths into full URLs
-//     const updatedProducts = products.map((p) => ({
-//       ...p._doc,
-//       image: p.image
-//         ? `${req.protocol}://${req.get("host")}${p.image}` // e.g. http://localhost:5000/uploads/images/abc.png
-//         : null,
-//     }));
-
-//     res.status(200).json({
-//       message: "🛒 All uploaded products",
-//       count: products.length,
-//       products: updatedProducts,
-//     });
-//   } catch (err) {
-//     res.status(500).json({ message: err.message });
-//   }
-// });
-
 router.get("/api/products", async (req, res) => {
   try {
     // Fetch all products directly from MongoDB
@@ -141,32 +118,6 @@ router.post("/upload", upload.single("image"), async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 });
-
-// ✅ Get Single Product Details (for React frontend)
-
-// router.get("/api/products/:id", async (req, res) => {
-//   try {
-//     const product = await Product.findById(req.params.id);
-
-//     if (!product) {
-//       return res.status(404).json({ message: "Product not found" });
-//     }
-
-//     // ✅ Convert relative image path into full URL
-//     const updatedProduct = {
-//       ...product._doc,
-//       image: product.image
-//         ? `${req.protocol}://${req.get("host")}${product.image}` // ✅ Add slash
-//         : null,
-//     };
-
-//     res.status(200).json(updatedProduct);
-//   } catch (err) {
-//     res.status(500).json({ message: err.message });
-//   }
-// });
-
-
 router.get("/api/products/:id", async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
@@ -235,8 +186,9 @@ router.post("/edit/:id", upload.single("image"), async (req, res) => {
       "rating.rate": parseFloat(rating),
     };
 
-    if (req.file) {
-      updateData.image = `/uploads/images/${req.file.filename}`;
+    // ✅ Use Cloudinary URL instead of local uploads path
+    if (req.file && req.file.path) {
+      updateData.image = req.file.path; // Cloudinary automatically provides the full https URL
     }
 
     await Product.findByIdAndUpdate(req.params.id, updateData, { new: true });
@@ -246,6 +198,8 @@ router.post("/edit/:id", upload.single("image"), async (req, res) => {
     res.status(500).send(err.message);
   }
 });
+
+
 
 
 // 🗑️ DELETE PRODUCT
