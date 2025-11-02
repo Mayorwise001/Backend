@@ -2,20 +2,26 @@ import express from "express";
 import multer from "multer";
 import path from "path";
 import Product from "../models/productModel.js"; // ✅ Import Product model
+import { CloudinaryStorage } from "multer-storage-cloudinary";
+import cloudinary from '../cloudinaryConfig.js';
+
 
 const router = express.Router();
 
-// Set storage destination and filename
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "uploads/images"); // folder for image uploads
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname));
+// ✅ Set storage destination and filename (Cloudinary)
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: "uploads/images", // folder name in Cloudinary
+    format: async (req, file) => {
+      const ext = path.extname(file.originalname).substring(1);
+      return ext || "jpg"; // default to jpg
+    },
+    public_id: (req, file) => Date.now() + "-" + path.parse(file.originalname).name,
   },
 });
 
-// File filter — only allow images
+// ✅ File filter — only allow images
 const imageFilter = (req, file, cb) => {
   const allowedTypes = /jpeg|jpg|png|webp|gif/;
   const mimeType = allowedTypes.test(file.mimetype);
@@ -27,7 +33,9 @@ const imageFilter = (req, file, cb) => {
   cb(new Error("Only image files are allowed (jpeg, jpg, png, webp, gif)!"));
 };
 
+// ✅ Multer upload middleware
 const upload = multer({ storage, fileFilter: imageFilter });
+
 
 // ✅ Render Upload Page
 router.get("/", (req, res) => {
@@ -71,101 +79,54 @@ router.get("/api/products", async (req, res) => {
 });
 
 
-
-// ✅ Upload Product and Save to Database
-// router.post("/upload", upload.single("image"), async (req, res) => {
-//   try {
-//     // Check if image exists
-//     if (!req.file) return res.status(400).json({ message: "No image uploaded" });
-
-//     // Extract fields from form
-//     const { title, details, rating, price, categories } = req.body;
-
-//     // Validate required fields
-//     if (!title || !details || !rating || !price ) {
-//       return res
-//         .status(400)
-//         .json({ message: "All fields are required (title, details, rating, price, image)" });
-//     }
-
-//     // ✅ Create new product instance
-//     const newProduct = new Product({
-//       title,
-//       details,
-//       image: `/uploads/images/${req.file.filename}`,
-//       price: parseFloat(price),
-//       categories: categories
-//         ? categories.split(",").map((cat) => cat.trim()) // handle comma-separated list
-//         : [], // default empty array
-//       rating: {
-//         rate: parseFloat(rating),
-//         count: 1, // default to 1 for first rating input
-//       },
-//     });
-
-//     // ✅ Save product to MongoDB
-//     await newProduct.save();
-
-//     // Send response with all data
-//     res.status(200).json({
-//       message: "✅ Product uploaded and saved successfully!",
-//       product: newProduct,
-//     });
-//   } catch (err) {
-//     res.status(500).json({ message: err.message });
-//   }
-// });
-
-
 router.post("/upload", upload.single("image"), async (req, res) => {
   try {
-    // Check if image exists
+    // ✅ Check if image exists
     if (!req.file) return res.status(400).json({ message: "No image uploaded" });
 
-    // Extract fields from form
+    // ✅ Extract fields from form
     const { title, details, rating, price, categories } = req.body;
-const categoryArray = Array.isArray(categories)
-  ? categories
-  : categories.split(",").map((cat) => cat.trim());
+    const categoryArray = Array.isArray(categories)
+      ? categories
+      : categories.split(",").map((cat) => cat.trim());
 
-
-
-
-    // Validate required fields
+    // ✅ Validate required fields
     if (!title || !details || !rating || !price) {
-      return res
-        .status(400)
-        .json({ message: "All fields are required (title, details, rating, price, image)" });
+      return res.status(400).json({
+        message: "All fields are required (title, details, rating, price, image)",
+      });
     }
 
-    // ✅ Create new product instance
+    // ✅ Create new product instance (Cloudinary version)
     const newProduct = new Product({
       title,
       details,
-      image: `/uploads/images/${req.file.filename}`,
+      // ✅ Cloudinary automatically returns a secure URL in req.file.path
+      image: req.file.path, // updated line
       price: parseFloat(price),
       rating: {
         rate: parseFloat(rating),
         count: 1, // default to 1 for first rating input
       },
-categories: categoryArray, // ✅ not category
-
+      categories: categoryArray,
     });
 
     // ✅ Save product to MongoDB
     await newProduct.save();
 
-    // Send response with all data
+    // ✅ Send response with saved product
     res.status(200).json({
-      message: "✅ Product uploaded and saved successfully!",
+      message: "✅ Product uploaded and saved successfully to Cloudinary!",
       product: newProduct,
     });
   } catch (err) {
+    console.error("Upload error:", err);
     res.status(500).json({ message: err.message });
   }
 });
 
 // ✅ Get Single Product Details (for React frontend)
+
 router.get("/api/products/:id", async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
@@ -187,7 +148,27 @@ router.get("/api/products/:id", async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 });
+router.get("/products/:id", async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id);
 
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    // ✅ Convert relative image path into full URL
+    const updatedProduct = {
+      ...product._doc,
+      image: product.image
+        ? `${req.protocol}://${req.get("host")}${product.image}` // ✅ Add slash
+        : null,
+    };
+//res.status(200).json(updatedProduct);
+    res.render("productDetails", { product: updatedProduct });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
 
 
 // GET Edit Product Page
@@ -238,7 +219,5 @@ router.post("/delete/:id", async (req, res) => {
     res.status(500).send("Failed to delete product");
   }
 });
-
-
 
 export default router;
