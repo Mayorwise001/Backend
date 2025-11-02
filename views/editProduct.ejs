@@ -17,6 +17,16 @@
         <label>Details:</label>
         <textarea name="details" required><%= product.details %></textarea>
 
+      <!-- ✅ Product Category -->
+      <label for="categories">Category</label>
+      <select name="categories" id="categories" required>
+        <option value="">-- Select Category --</option>
+        <option value="Laptops">Laptops</option>
+        <option value="Accessories">Accessories</option>
+        <option value="Gaming">Gaming</option>
+        <option value="Electronics">Electronics</option>
+      </select>
+<br>
         <label>Price:</label>
         <input type="number" name="price" value="<%= product.price %>" required />
 

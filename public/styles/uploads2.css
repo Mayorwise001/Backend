@@ -34,7 +34,7 @@ body {
 
 /* ---------- LAYOUT CARD ---------- */
 .container {
-  width: 500px;
+  width: 1100px;
   max-width: var(--max-width);
   background: var(--card);
   border-radius: var(--radius);
@@ -56,8 +56,9 @@ h2 {
   margin: 0 0 8px 0;
   font-size: 1.25rem;
   letter-spacing: -0.2px;
-  color: #071029;
+  color: #e5e6eb;
   font-weight: 600;
+  margin: auto;
 }
 
 .form-block {
