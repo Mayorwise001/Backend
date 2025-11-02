@@ -55,6 +55,8 @@ router.get("/products", async (req, res) => {
 });
 
 
+
+
 // ✅ Get All Products (API Endpoint for React Frontend)
 // router.get("/api/products", async (req, res) => {
 //   try {
@@ -80,25 +82,19 @@ router.get("/products", async (req, res) => {
 
 router.get("/api/products", async (req, res) => {
   try {
+    // Fetch all products directly from MongoDB
     const products = await Product.find();
-
-    // ✅ Use Cloudinary URLs directly — no need to prepend host
-    const updatedProducts = products.map((p) => ({
-      ...p._doc,
-      image: p.image && p.image.startsWith("https")
-        ? p.image // ✅ Already a Cloudinary URL
-        : `${req.protocol}://${req.get("host")}${p.image}`, // fallback for older local uploads
-    }));
 
     res.status(200).json({
       message: "🛒 All uploaded products",
       count: products.length,
-      products: updatedProducts,
+      products, // Send exactly what’s stored, including full Cloudinary URLs
     });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
+
 
 router.post("/upload", upload.single("image"), async (req, res) => {
   try {
