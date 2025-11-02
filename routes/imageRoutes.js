@@ -144,6 +144,29 @@ router.post("/upload", upload.single("image"), async (req, res) => {
 
 // ✅ Get Single Product Details (for React frontend)
 
+// router.get("/api/products/:id", async (req, res) => {
+//   try {
+//     const product = await Product.findById(req.params.id);
+
+//     if (!product) {
+//       return res.status(404).json({ message: "Product not found" });
+//     }
+
+//     // ✅ Convert relative image path into full URL
+//     const updatedProduct = {
+//       ...product._doc,
+//       image: product.image
+//         ? `${req.protocol}://${req.get("host")}${product.image}` // ✅ Add slash
+//         : null,
+//     };
+
+//     res.status(200).json(updatedProduct);
+//   } catch (err) {
+//     res.status(500).json({ message: err.message });
+//   }
+// });
+
+
 router.get("/api/products/:id", async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
@@ -152,12 +175,10 @@ router.get("/api/products/:id", async (req, res) => {
       return res.status(404).json({ message: "Product not found" });
     }
 
-    // ✅ Convert relative image path into full URL
+    // ✅ Fetch image directly from MongoDB (Cloudinary URL)
     const updatedProduct = {
       ...product._doc,
-      image: product.image
-        ? `${req.protocol}://${req.get("host")}${product.image}` // ✅ Add slash
-        : null,
+      image: product.image ? product.image : null,
     };
 
     res.status(200).json(updatedProduct);
@@ -165,6 +186,9 @@ router.get("/api/products/:id", async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 });
+
+
+
 router.get("/products/:id", async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
@@ -173,19 +197,19 @@ router.get("/products/:id", async (req, res) => {
       return res.status(404).json({ message: "Product not found" });
     }
 
-    // ✅ Convert relative image path into full URL
+    // ✅ Use the Cloudinary URL directly from MongoDB
     const updatedProduct = {
       ...product._doc,
-      image: product.image
-        ? `${req.protocol}://${req.get("host")}${product.image}` // ✅ Add slash
-        : null,
+      image: product.image ? product.image : null,
     };
-//res.status(200).json(updatedProduct);
+
+    // res.status(200).json(updatedProduct);
     res.render("productDetails", { product: updatedProduct });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
+
 
 
 // GET Edit Product Page
