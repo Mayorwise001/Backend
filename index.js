@@ -7,7 +7,9 @@ import { fileURLToPath } from 'url';
 import path from 'path';
 import morgan from "morgan";
 import imageRoutes from "./routes/imageRoutes.js";
-
+import { notFound } from "./middleware/notFound.js";
+import { errorHandler } from "./middleware/errorHandler.js";
+import cookieParser from "cookie-parser";
 
 dotenv.config();
 connectDB(); // Connect MongoDB
@@ -19,6 +21,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan("dev"));
+app.use(cookieParser());
 
 // setup __dirname
 const __filename = fileURLToPath(import.meta.url);
@@ -31,7 +34,6 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 app.use("/uploads/images", express.static(path.join(__dirname, "uploads/images")));
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
-
   
   // Product routes
 app.use("/", imageRoutes);
@@ -51,6 +53,12 @@ app.use((err, req, res, next) => {
     stack: process.env.NODE_ENV === "production" ? null : err.stack,
   });
 });
+
+// ✅ Error handling middlewares
+app.use(notFound);
+app.use(errorHandler);
+
+
 
 // Start server
 const PORT = process.env.PORT || 5000;

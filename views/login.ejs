@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .login-container {
+      background-color: #fff;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0px 4px 12px rgba(0,0,0,0.1);
+      width: 350px;
+    }
+
+    .login-container h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .login-container form {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .login-container label {
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+
+    .login-container input {
+      padding: 10px;
+      margin-bottom: 15px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    .login-container button {
+      padding: 10px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .login-container button:hover {
+      background-color: #0056b3;
+    }
+
+    .message {
+      margin-top: 10px;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .signup-link {
+      text-align: center;
+      margin-top: 15px;
+    }
+
+    .toggle-btn {
+      cursor: pointer;
+      font-size: 13px;
+      color: #007bff;
+      margin-top: -10px;
+      margin-bottom: 15px;
+      text-align: right;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="login-container">
+    <h2>Welcome Back</h2>
+
+    <!-- Login Form -->
+    <form id="loginForm" action="/login" method="POST">
+      <label for="email">Email</label>
+      <input type="email" id="email" name="email" placeholder="you@example.com" required />
+
+      <label for="password">Password</label>
+      <input type="password" id="password" name="password" placeholder="Enter password" required />
+
+      <!-- Show Password Button -->
+      <p class="toggle-btn" id="togglePassword">Show Password</p>
+
+      <button type="submit">Login</button>
+    </form>
+
+    <!-- Message Display -->
+    <% if (message) { %>
+      <p class="message" style="color:green"><%= message %></p>
+    <% } else { %>
+      <p class="message" id="message"></p>
+    <% } %>
+
+    <p class="signup-link">
+      Don't have an account? <a href="/signup">Sign Up</a>
+    </p>
+  </div>
+
+  <!-- Script -->
+
+  <script>
+    const togglePassword = document.getElementById("togglePassword");
+    const passwordInput = document.getElementById("password");
+    const form = document.getElementById("loginForm");
+    const message = document.getElementById("message");
+
+    // Show/Hide Password Toggle
+    togglePassword.addEventListener("click", () => {
+      const type = passwordInput.getAttribute("type") === "password" ? "text" : "password";
+      passwordInput.setAttribute("type", type);
+      togglePassword.textContent = type === "password" ? "Show Password" : "Hide Password";
+    });
+
+    // ✅ Redirect after successful login
+    <% if (message && success) { %>
+      setTimeout(() => {
+        window.location.href = "/";
+      }, 1000); // 1 second
+    <% } %>
+  </script>
+
+
+</body>
+</html>

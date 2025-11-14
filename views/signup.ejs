@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign Up</title>
+  <link rel="stylesheet" href="/styles/signup.css" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .signup-container {
+      background-color: #fff;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0px 4px 12px rgba(0,0,0,0.1);
+      width: 350px;
+    }
+    .signup-container h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .signup-container form {
+      display: flex;
+      flex-direction: column;
+    }
+    .signup-container label {
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    .signup-container input {
+      padding: 10px;
+      margin-bottom: 15px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    .signup-container button {
+      padding: 10px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .signup-container button:hover {
+      background-color: #0056b3;
+    }
+    .message {
+      margin-top: 10px;
+      text-align: center;
+      font-weight: bold;
+    }
+    .login-link {
+      text-align: center;
+      margin-top: 15px;
+    }
+  </style>
+</head>
+<body>
+  <div class="signup-container">
+    <h2>Create Account</h2>
+
+    <!-- Signup Form -->
+    <form id="signupForm" method="POST" action="/api/signup">
+      <label for="name">Name</label>
+      <input type="text" id="name" name="name" placeholder="Your full name" required />
+
+      <label for="email">Email</label>
+      <input type="email" id="email" name="email" placeholder="you@example.com" required />
+
+<label for="password">Password</label>
+<div style="position: relative;">
+  <input type="password" id="password" name="password" placeholder="Enter a strong password" required />
+  <button type="button" id="togglePassword" style="position:absolute; right:5px; top:5px;">Show</button>
+</div>
+
+<!-- Password rules display -->
+<div id="passwordRules" style="font-size: 12px; margin-bottom: 10px;">
+  <p id="ruleLength" style="color:red;">• At least 6 characters</p>
+  <p id="ruleUpper" style="color:red;">• At least one uppercase letter</p>
+  <p id="ruleLower" style="color:red;">• At least one lowercase letter</p>
+  <p id="ruleNumber" style="color:red;">• At least one number</p>
+  <p id="ruleSymbol" style="color:red;">• At least one special character (!@#$...)</p>
+</div>
+      <button type="submit">Sign Up</button>
+    </form>
+
+    <p class="message" id="message"></p>
+    <p class="login-link">Already have an account? <a href="/login">Login</a></p>
+  </div>
+
+  <!-- Optional: Add client-side JS to show messages -->
+  <script>
+  const form = document.getElementById("signupForm");
+  const message = document.getElementById("message");
+  const passwordInput = document.getElementById("password");
+  const togglePassword = document.getElementById("togglePassword");
+
+  const ruleLength = document.getElementById("ruleLength");
+  const ruleUpper = document.getElementById("ruleUpper");
+  const ruleLower = document.getElementById("ruleLower");
+  const ruleNumber = document.getElementById("ruleNumber");
+  const ruleSymbol = document.getElementById("ruleSymbol");
+
+  // ✅ Show/Hide Password
+  togglePassword.addEventListener("click", () => {
+    if (passwordInput.type === "password") {
+      passwordInput.type = "text";
+      togglePassword.textContent = "Hide";
+    } else {
+      passwordInput.type = "password";
+      togglePassword.textContent = "Show";
+    }
+  });
+
+  // ✅ Live password validation display
+  passwordInput.addEventListener("input", () => {
+    const pwd = passwordInput.value;
+    ruleLength.style.color = pwd.length >= 6 ? "green" : "red";
+    ruleUpper.style.color = /[A-Z]/.test(pwd) ? "green" : "red";
+    ruleLower.style.color = /[a-z]/.test(pwd) ? "green" : "red";
+    ruleNumber.style.color = /[0-9]/.test(pwd) ? "green" : "red";
+    ruleSymbol.style.color = /[!@#$%^&*(),.?":{}|<>]/.test(pwd) ? "green" : "red";
+  });
+
+  // ✅ Form submit with password check
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const name = form.name.value;
+    const email = form.email.value;
+    const password = passwordInput.value;
+
+    // Password conditions
+    const minLength = 6;
+    const hasUppercase = /[A-Z]/.test(password);
+    const hasLowercase = /[a-z]/.test(password);
+    const hasNumber = /[0-9]/.test(password);
+    const hasSymbol = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+
+    if (password.length < minLength) {
+      message.textContent = "Password must be at least 6 characters long.";
+      message.style.color = "red";
+      return;
+    }
+    if (!hasUppercase) {
+      message.textContent = "Password must include at least one uppercase letter.";
+      message.style.color = "red";
+      return;
+    }
+    if (!hasLowercase) {
+      message.textContent = "Password must include at least one lowercase letter.";
+      message.style.color = "red";
+      return;
+    }
+    if (!hasNumber) {
+      message.textContent = "Password must include at least one number.";
+      message.style.color = "red";
+      return;
+    }
+    if (!hasSymbol) {
+      message.textContent = "Password must include at least one special character (!@#$...).";
+      message.style.color = "red";
+      return;
+    }
+
+    // ✅ Send signup request if all rules met
+    const formData = { name, email, password };
+    try {
+      const res = await fetch("/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData)
+      });
+      const data = await res.json();
+
+      if (res.ok) {
+        message.textContent = data.message;
+        message.style.color = "green";
+        form.reset();
+      } else {
+        message.textContent = data.message || "Signup failed";
+        message.style.color = "red";
+      }
+    } catch (err) {
+      message.textContent = "Server error. Try again.";
+      message.style.color = "red";
+    }
+  });
+</script>

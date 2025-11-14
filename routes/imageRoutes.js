@@ -2,8 +2,13 @@ import express from "express";
 import multer from "multer";
 import path from "path";
 import Product from "../models/productModel.js"; // ✅ Import Product model
+import User from "../models/usermodel.js";
 import { CloudinaryStorage } from "multer-storage-cloudinary";
 import cloudinary from '../cloudinaryConfig.js';
+import jwt from "jsonwebtoken";
+import bcrypt from "bcryptjs";
+import { protect } from "../middleware/authMiddleware.js";
+
 
 
 const router = express.Router();
@@ -36,13 +41,117 @@ const imageFilter = (req, file, cb) => {
 // ✅ Multer upload middleware
 const upload = multer({ storage, fileFilter: imageFilter });
 
+// Get signup Form
+router.get("/signup", async (req, res) => {
+res.render("signup");
+})
+
+
+// POST /api/signup
+router.post("/signup", async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+
+    // Validate required fields
+    if (!name || !email || !password) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    // Check if user already exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ message: "User already exists" });
+    }
+
+    // Create new user
+    const user = await User.create({ name, email, password });
+
+    res.status(201).json({
+      message: "User registered successfully",
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+      },
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+
+
+// LOGIN ROUTE
+router.get("/login", async (req, res) => {
+res.render("login", { message: "" });
+})
+
+
+
+// LOGIN ROUTE
+router.post("/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // 1️⃣ Check empty fields
+    if (!email || !password) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    // 2️⃣ Check if user exists
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: "User does not exist" });
+    }
+
+    // 3️⃣ Validate password
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if (!isMatch) {
+      return res.status(400).json({ message: "Incorrect password" });
+    }
+
+    // 4️⃣ Generate JWT Token
+    const token = jwt.sign(
+      { id: user._id },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
+
+    // ✅ Set cookie
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: false, // true if using HTTPS
+      maxAge: 60 * 60 * 1000, // 1 hour
+    });
+
+    // Redirect to home page (Upload)
+    return res.render("login", {
+      message: "Login successful! Redirecting...",
+      email: "",
+      success: true, // flag for success
+    });
+
+  } catch (error) {
+    console.error("Login Error:", error);
+    res.status(500).json({ message: "Server error. Try again." });
+  }
+});
+
+router.get("/logout", (req, res) => {
+  res.clearCookie("token");
+  res.redirect("/login");
+});
+
+
 
 // ✅ Render Upload Page
-router.get("/", (req, res) => {
+router.get("/", protect, (req, res) => {
   res.render("Upload");
 });
 
-router.get("/products", async (req, res) => {
+router.get("/products", protect, async (req, res) => {
   try {
     const products = await Product.find();
     res.render("products", {
@@ -57,7 +166,7 @@ router.get("/products", async (req, res) => {
 
 
 
-router.get("/api/products", async (req, res) => {
+router.get("/api/products", protect, async (req, res) => {
   try {
     // Fetch all products directly from MongoDB
     const products = await Product.find();
@@ -73,7 +182,7 @@ router.get("/api/products", async (req, res) => {
 });
 
 
-router.post("/upload", upload.single("image"), async (req, res) => {
+router.post("/upload", upload.single("image"),protect, async (req, res) => {
   try {
     // ✅ Check if image exists
     if (!req.file) return res.status(400).json({ message: "No image uploaded" });
@@ -118,7 +227,7 @@ router.post("/upload", upload.single("image"), async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 });
-router.get("/api/products/:id", async (req, res) => {
+router.get("/api/products/:id", protect, async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
 
@@ -140,7 +249,7 @@ router.get("/api/products/:id", async (req, res) => {
 
 
 
-router.get("/products/:id", async (req, res) => {
+router.get("/products/:id", protect, async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
 
@@ -164,7 +273,7 @@ router.get("/products/:id", async (req, res) => {
 
 
 // GET Edit Product Page
-router.get("/edit/:id", async (req, res) => {
+router.get("/edit/:id",protect, async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
     if (!product) return res.status(404).send("Product not found");
@@ -175,7 +284,7 @@ router.get("/edit/:id", async (req, res) => {
 });
 
 // POST Edit Product
-router.post("/edit/:id", upload.single("image"), async (req, res) => {
+router.post("/edit/:id", upload.single("image"),protect, async (req, res) => {
   try {
     const { title, details, price, rating } = req.body;
 
@@ -214,5 +323,10 @@ router.post("/delete/:id", async (req, res) => {
     res.status(500).send("Failed to delete product");
   }
 });
+
+
+
+
+
 
 export default router;
