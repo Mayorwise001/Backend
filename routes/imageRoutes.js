@@ -166,7 +166,7 @@ router.get("/products", protect, async (req, res) => {
 
 
 
-router.get("/api/products", protect, async (req, res) => {
+router.get("/api/products", async (req, res) => {
   try {
     // Fetch all products directly from MongoDB
     const products = await Product.find();
