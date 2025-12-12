@@ -227,7 +227,7 @@ router.post("/upload", upload.single("image"),protect, async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 });
-router.get("/api/products/:id", protect, async (req, res) => {
+router.get("/api/products/:id", async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
 
